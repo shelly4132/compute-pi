@@ -3,7 +3,7 @@ CFLAGS = -O0 -std=gnu99 -Wall -fopenmp -mavx
 EXECUTABLE = \
 	time_test_baseline time_test_openmp_2 time_test_openmp_4 \
 	time_test_avx time_test_avxunroll \
-	benchmark_clock_gettime
+	benchmark_clock_gettime error
 
 default: computepi.o
 	$(CC) $(CFLAGS) computepi.o time_test.c -DBASELINE -o time_test_baseline
@@ -12,6 +12,7 @@ default: computepi.o
 	$(CC) $(CFLAGS) computepi.o time_test.c -DAVX -o time_test_avx
 	$(CC) $(CFLAGS) computepi.o time_test.c -DAVXUNROLL -o time_test_avxunroll
 	$(CC) $(CFLAGS) computepi.o benchmark_clock_gettime.c -o benchmark_clock_gettime
+	$(CC) $(CFLAGS) computepi.o error.c -o error
 
 .PHONY: clean default
 
@@ -26,13 +27,22 @@ check: default
 	time ./time_test_avxunroll
 
 gencsv: default
-	for i in `seq 100 5000 25000`; do \
+	for i in `seq 100 5000 1000000`; do \
 		printf "%d," $$i;\
 		./benchmark_clock_gettime $$i; \
 	done > result_clock_gettime.csv	
 
 plot: result_clock_gettime.csv
-	gnuplot scripts/runtime.gp	
+	gnuplot scripts/runtime.gp
+
+errcsv:
+	for i in `seq 100 5000 1000000`; do \
+		printf "%d," $$i;\
+		./error $$i; \
+	done > result_error_rate.csv
+
+plot2: result_error_rate.csv
+	gnuplot scripts/error_rate.gp
 
 clean:
-	rm -f $(EXECUTABLE) *.o *.s result_clock_gettime.csv
+	rm -f $(EXECUTABLE) *.o *.s result_clock_gettime.csv result_error_rate.csv

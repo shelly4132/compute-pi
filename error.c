@@ -49,6 +49,18 @@ int main(int argc, char const *argv[])
     pi = compute_pi_avx_unroll(N);
     diff = pi - M_PI > 0 ? pi - M_PI : M_PI - pi;
     error = diff / M_PI;
+    printf("%lf,", error);
+
+    // Euler
+    pi = compute_pi_euler(N);
+    diff = pi - M_PI > 0 ? pi - M_PI : M_PI - pi;
+    error = diff / M_PI;
+    printf("%lf,", error);
+
+    // leibniz
+    pi = compute_pi_leibniz(N);
+    diff = pi - M_PI > 0 ? pi - M_PI : M_PI - pi;
+    error = diff / M_PI;
     printf("%lf\n", error);
 
     return 0;

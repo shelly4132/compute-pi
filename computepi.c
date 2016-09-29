@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <immintrin.h>
 #include <omp.h>
+#include <math.h>
+#include <time.h>
 #include "computepi.h"
 
 double compute_pi_baseline(size_t N)
@@ -75,10 +77,10 @@ double compute_pi_avx_unroll(size_t N)
     for (int i = 0; i <= N - 16; i += 16) {
         ymm14 = _mm256_set1_pd(i * dt);
 
-        ymm10 = _mm256_add_pd(ymm14, ymm2);
-        ymm11 = _mm256_add_pd(ymm14, ymm3);
-        ymm12 = _mm256_add_pd(ymm14, ymm4);
-        ymm13 = _mm256_add_pd(ymm14, ymm5);
+        ymm10 = _mm256_add_pd(ymm14, ymm2); // i*dt+3*dt, i*dt+2*dt, i*dt+1*dt, i*dt+0.0 
+        ymm11 = _mm256_add_pd(ymm14, ymm3); // i*dt+7*dt, i*dt+6*dt, i*dt+5*dt, i*dt+4*dt
+        ymm12 = _mm256_add_pd(ymm14, ymm4); // i*dt+11*dt, i*dt+10*dt, i*dt+9*dt, i*dt+8*dt
+        ymm13 = _mm256_add_pd(ymm14, ymm5); // i*dt+15*dt, i*dt+14*dt, i*dt+13*dt, i*dt+12*dt
 
         ymm10 = _mm256_mul_pd(ymm10, ymm10);
         ymm11 = _mm256_mul_pd(ymm11, ymm11);
@@ -116,4 +118,55 @@ double compute_pi_avx_unroll(size_t N)
           tmp3[0] + tmp3[1] + tmp3[2] + tmp3[3] +
           tmp4[0] + tmp4[1] + tmp4[2] + tmp4[3];
     return pi * 4.0;
+}
+
+double compute_pi_euler(size_t N)
+{
+    double pi = 0.0;
+    for (size_t i = 1; i <= N; i++) {
+        pi += (1 / pow(i, 2.0));
+    }
+    pi *= 6; 
+    return sqrt(pi);
+}
+
+double compute_pi_leibniz(size_t N)
+{
+    double pi = 0.0;
+    int tmp = 1;
+    for (size_t i =0; i < N; i++) {
+        pi += tmp / (2.0 * (double)i + 1.0);
+        tmp *= (-1);
+    }
+    pi *= 4; 
+    return pi;
+}
+
+double compute_ci(double *min, double *max, double data[SAMPLE_SIZE])
+{
+    double mean = 0.0;
+    double stddev = 0.0;
+    double stderror;
+    int i = 0;
+
+    //mean
+    for(i = 0; i < SAMPLE_SIZE; i++){
+        mean += data[i];
+    }
+    mean /= SAMPLE_SIZE;
+
+    //standard deviation
+    for(i = 0; i < SAMPLE_SIZE; i++){
+        stddev += (data[i] - mean) * (data[i] - mean);
+    }
+    stddev = sqrt(stddev / (double)SAMPLE_SIZE);
+
+    //standard deviation
+    stderror = stddev / sqrt((double)SAMPLE_SIZE);
+
+    *min = mean - (1.96 * stderror);
+    *max = mean + (1.96 * stderror);
+
+
+    return mean;
 }

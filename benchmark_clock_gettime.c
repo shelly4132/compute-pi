@@ -15,55 +15,123 @@ int main(int argc, char const *argv[])
 
     int N = atoi(argv[1]);
     int i, loop = 25;
+    double time;
+    double min, max;
+    double sum = 0.0;
+
+    FILE *fp = fopen("ci.txt", "r");
+
 
     // Baseline
-    clock_gettime(CLOCK_ID, &start);
+    fscanf(fp, "%lf %lf", &min, &max);
     for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
         compute_pi_baseline(N);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
     }
-    clock_gettime(CLOCK_ID, &end);
-    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
-           (end.tv_nsec - start.tv_nsec)/ONE_SEC);
-
+    printf("%lf,", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
 
     // OpenMP with 2 threads
-    clock_gettime(CLOCK_ID, &start);
+    fscanf(fp, "%lf %lf", &min, &max);
     for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
         compute_pi_openmp(N, 2);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
     }
-    clock_gettime(CLOCK_ID, &end);
-    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
-           (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+    printf("%lf,", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
 
 
     // OpenMP with 4 threads
-    clock_gettime(CLOCK_ID, &start);
+    fscanf(fp, "%lf %lf", &min, &max);
     for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
         compute_pi_openmp(N, 4);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
     }
-    clock_gettime(CLOCK_ID, &end);
-    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
-           (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+    printf("%lf,", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
 
 
     // AVX SIMD
-    clock_gettime(CLOCK_ID, &start);
+    fscanf(fp, "%lf %lf", &min, &max);
     for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
         compute_pi_avx(N);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
     }
-    clock_gettime(CLOCK_ID, &end);
-    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
-           (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+    printf("%lf,", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
 
 
     // AVX SIMD + Loop unrolling
-    clock_gettime(CLOCK_ID, &start);
+    fscanf(fp, "%lf %lf", &min, &max);
     for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
         compute_pi_avx_unroll(N);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
     }
-    clock_gettime(CLOCK_ID, &end);
-    printf("%lf\n", (double) (end.tv_sec - start.tv_sec) +
-           (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+    printf("%lf,", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
+
+
+/*    //Euler
+    fscanf(fp, "%lf %lf", &min, &max);
+    for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_euler(N);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i -= 1;
+    }
+    printf("%lf\n", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
+*/
+
+    //Leibniz
+    fscanf(fp, "%lf %lf", &min, &max);
+    for(i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_leibniz(N);
+        clock_gettime(CLOCK_ID, &end);
+        time = (double)(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)/ONE_SEC;
+        if(time >= min && time <= max)
+            sum += time;
+        else
+            i--;
+    }
+    printf("%lf\n", sum/(double)SAMPLE_SIZE);
+    sum = 0.0;
+
 
     return 0;
 }

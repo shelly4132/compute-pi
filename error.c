@@ -39,14 +39,14 @@ int main(int argc, char const *argv[])
 
 
     // AVX SIMD
-    compute_pi_avx(N);
+    pi = compute_pi_avx(N);
     diff = pi - M_PI > 0 ? pi - M_PI : M_PI - pi;
     error = diff / M_PI;
     printf("%lf,", error);
 
 
     // AVX SIMD + Loop unrolling
-    compute_pi_avx_unroll(N);
+    pi = compute_pi_avx_unroll(N);
     diff = pi - M_PI > 0 ? pi - M_PI : M_PI - pi;
     error = diff / M_PI;
     printf("%lf\n", error);
